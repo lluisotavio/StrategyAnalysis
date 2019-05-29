@@ -2,7 +2,6 @@ from load import Unievent
 import pandas as pd
 from converter import Df2CSV
 import InputParams
-import os
 import glob
 
 
