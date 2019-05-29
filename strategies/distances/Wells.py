@@ -13,7 +13,10 @@ class Wells:
         df = csv2df.csv2df('%s%s.csv' % (InputParams.outputfolder,name_csv_input))
         if list_unievents == []:
             list_unievents = list(df.index)
+        start = time.time()
         self.array_unievent_df_well_position = self.gen_array_unievent_df_well_position(df, list_unievents)
+        end = time.time()
+        print((end-start)*1000,'criacao novo df')
 
     def gen_array_unievent_df_well_position(self, df, list_unievents):
         df_only_well_data = df.drop(columns=['cpo', 'cpl', 'cpw', 'cpiw'])
@@ -56,27 +59,29 @@ class Wells:
         return array_unievent_df_well_position
 
     def run(self,name_csv):
-        final = pd.DataFrame()
         array1 = []
         df1 = pd.DataFrame()
         df2 = pd.DataFrame()
-        df = pd.DataFrame()
         columns = ['UNIEVENT1', 'UNIEVENT2', 'DISTANCE']
         for k in range(len(self.array_unievent_df_well_position)-1):
             name_unievent1 = self.array_unievent_df_well_position[k][0]
             name_unievent2 = self.array_unievent_df_well_position[k+1][0]
             matrix = self.gen_distance_matrix(self.array_unievent_df_well_position[k][1],self.array_unievent_df_well_position[k+1][1])
-            [n_rows, n_cols] = matrix.shape
-            ########problema eficiencia
-            start = time.time()
-            for i in range(n_rows):
-                for j in range(n_cols):
-                    distance_wells_unievent1_unievent2 = matrix.iloc[i, j]
-                    array1.append([name_unievent1, name_unievent2, distance_wells_unievent1_unievent2])
-                    df1 = pd.concat((df1,self.array_unievent_df_well_position[k][1].loc[[matrix.index[i]]]),axis=0)
-                    df2 = pd.concat((df2,self.array_unievent_df_well_position[k+1][1].loc[[matrix.columns[j]]]),axis=0)
-            end = time.time()
-            print('tempo gasto iteracao n, com n variando de 1 até numero de estrategias a comparar df estrategia 1 X estrategia 2',(end-start)*1000,'ms')
+            print(matrix)
+            [n_rows, n_cols] = (len(self.array_unievent_df_well_position[k][0]),len(self.array_unievent_df_well_position[k+1][0]))
+            # ########problema eficiencia
+            # start = time.time()
+            # ijk = []
+            # for i in range(n_rows):
+            #     df1 = pd.concat((df1, self.array_unievent_df_well_position[k][1].loc[[matrix.index[i]]]), axis=0)
+            #     for j in range(n_cols):
+            #         distance_wells_unievent1_unievent2 = matrix.iloc[i, j]
+            #         array1.append([name_unievent1, name_unievent2, distance_wells_unievent1_unievent2])
+            #         ijk.append([i,j,k])
+            #         df2 = pd.concat((df2,self.array_unievent_df_well_position[k+1][1].loc[[matrix.columns[j]]]),axis=0)
+            #
+            # end = time.time()
+            # print('tempo gasto iteracao n, com n variando de 1 até numero de estrategias a comparar df estrategia 1 X estrategia 2',(end-start)*1000,'ms')
         df1 = df1.reset_index()
         df2 = df2.reset_index()
         df1.columns = df1.columns + '_UNIEVENT1'
